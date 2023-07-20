@@ -1,14 +1,13 @@
-# importing datetime module
 import logging
 import sys
 import time
 import datetime
-import requests
+
 import csv
 from collections import namedtuple
 
 # sample CSV data
-# -----------
+# ---------------
 # start                   end                     baseprice     unit
 # 17.07.2023 12:00:00     17.07.2023 13:00:00     7.73          Cent/kWh
 # 17.07.2023 13:00:00     17.07.2023 14:00:00     7.73          Cent/kWh
@@ -22,6 +21,11 @@ SECONDS_IN_A_DAY = 24 * 60 * 60
 #------------------------------------------------------------------------------
 def fetch_awattar_data_next_48hours(startEpoch : int):
 #------------------------------------------------------------------------------
+
+    import requests
+    from requests.packages.urllib3.exceptions import InsecureRequestWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
     #                                                start=1689724800000&end=1689811200000
     url = "https://api.awattar.at/v1/marketdata/csv?start={start}&end={end}".format(
           start=startEpoch * 1000
@@ -34,6 +38,7 @@ def fetch_awattar_data_next_48hours(startEpoch : int):
 
     except requests.exceptions.RequestException as e:
         print("Error occurred:", e)    
+        sys.exit(999)
 
 #------------------------------------------------------------------------------
 def check_values(tomorrow_values : list[any], tomorrow_str : str):
@@ -43,11 +48,13 @@ def check_values(tomorrow_values : list[any], tomorrow_str : str):
         count += 1
         time_expected = "{0} {1:02d}:00:00".format(tomorrow_str,idx)
         if v.start != time_expected:
-            logging.error("expected: %s, got: %s", time_expected, v.start)
+            logging.error('expected: %s, got: %s', time_expected, v.start)
             return False
         
     if count != 24:
-        logging.error("expected 24 values, got: %d", count)
+        logging.error('expected 24 values, got: %d', count)
+        if datetime.datetime.now().hour < 14:
+            logging.warning("HINT: it seems it's before 14 o'Clock")   
         return False 
 
     return True
@@ -68,46 +75,54 @@ def find_starting_index_cheapest_hours(hours : list[any]):
     return lowest_start_index
 
 #------------------------------------------------------------------------------
-# MAIN
+def main(argv : list[str]):
 #------------------------------------------------------------------------------
 
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.DEBUG,
-    datefmt='%Y-%m-%d %H:%M:%S')
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S')
 
-logging.info("START")
+    logging.info("START")
 
-#with open('data.csv','r') as infile:
-#    csv_string = infile.read()
+    #with open('data.csv','r') as infile:
+    #    csv_string = infile.read()
 
-csv_string = fetch_awattar_data_next_48hours(int(time.time()))
+    awattar_time = int(time.time())
+    day_to_calc = datetime.date.today() + datetime.timedelta(days=1) # tomorrow
+    
+    if 'today' in argv:
+        awattar_time -= SECONDS_IN_A_DAY
+        day_to_calc  -= datetime.timedelta(days=1)
 
+    csv_string = fetch_awattar_data_next_48hours(awattar_time)
 
-reader = csv.reader(filter(None,csv_string.split('\n')), delimiter=';')
-Data = namedtuple("Data", next(reader))
-# "Data" is now a type with the fields "start", "end", "baseprice", "unit"
-# "rows" is a list of namedtuples
-rows = [Data(*line) for line in reader]
+    reader = csv.reader(filter(None,csv_string.split('\n')), delimiter=';')
+    Data = namedtuple("Data", next(reader))
+    # "Data" is now a type with the fields "start", "end", "baseprice", "unit"
+    # "rows" is a list of namedtuples
+    rows = [Data(*line) for line in reader]
 
-tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-tomorrow_str = tomorrow.strftime('%d.%m.%Y')
+    day_to_calc_str = day_to_calc.strftime('%d.%m.%Y')
+    tomorrow_hours = [ row for row in rows if row.start.startswith(day_to_calc_str) ]
 
-tomorrow_hours = [ row for row in rows if row.start.startswith(tomorrow_str) ]
+    #logging.info("calculated day:               %s", day_to_calc_str)
+    #logging.info("count hour data for this day: %d", len(tomorrow_hours) )
 
-logging.info("calculated tomorrow: %s", tomorrow_str)
-logging.info("tomorrow value count: %d", len(tomorrow_hours) )
+    if not check_values(tomorrow_hours, day_to_calc_str):
+        sys.exit(12)
 
-if not check_values(tomorrow_hours, tomorrow_str):
-    sys.exit(12)
+    logging.info("CHECKPOINT: we have now prices for 24 hours for day %s", day_to_calc)
 
-logging.info("CHECKPOINT: check of 24 time values ok")
+    idx_lowest_hours = find_starting_index_cheapest_hours(tomorrow_hours)
 
-idx_lowest_hours = find_starting_index_cheapest_hours(tomorrow_hours)
+    logging.info("idx_lowest_hours: %d, from %s to %s", 
+        idx_lowest_hours
+        , tomorrow_hours[idx_lowest_hours].start
+        , tomorrow_hours[idx_lowest_hours+3].end)
 
-logging.info("idx_lowest_hours: %d, from %s to %s", 
-      idx_lowest_hours
-    , tomorrow_hours[idx_lowest_hours].start
-    , tomorrow_hours[idx_lowest_hours+3].end)
-
-
+#------------------------------------------------------------------------------
+# Python SchmudoVoodoo
+#------------------------------------------------------------------------------
+if __name__ == "__main__":
+   main(sys.argv[1:])
