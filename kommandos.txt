@@ -1,0 +1,25 @@
+at -f at-htset-sommer.txt 15:59
+at -f at-htset-kuehlen.txt 10:00
+
+
+https://github.com/dstrigl/htheatpump/blob/master/htheatpump/htparams.csv
+
+pi@zero:~/helio $ htquery -b 19200 "Energiezaehler"
+3
+
+pi@zero:~/helio $ htquery -b 19200 "WW Normaltemp."
+50
+
+pi@zero:~/helio $ htquery -b 19200 "Liegenschaft"
+191438
+
+pi@zero:~/helio $ htquery -b 19200 "Verdichter laeuft seit" // seconds
+7857
+
+pi@zero:~/helio $ htquery -b 19200 "Temp. Aussen"
+29.2
+
+at -f at-htset-sommer.txt 16:00
+at -f at-htset-kuehlen.txt 9:00 2023-07-23
+at -f at-htset-sommer.txt 18:00 tomorrow
+
