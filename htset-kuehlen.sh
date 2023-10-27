@@ -1,2 +1,2 @@
 #!/bin/bash
-/home/pi/.local/bin/htset -b 19200 "Betriebsart" "2"
+/home/pi/.local/bin/htset "Betriebsart" "2"
