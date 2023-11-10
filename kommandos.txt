@@ -23,3 +23,8 @@ at -f at-htset-sommer.txt 16:00
 at -f at-htset-kuehlen.txt 9:00 2023-07-23
 at -f at-htset-sommer.txt 18:00 tomorrow
 
+Zeiten Warmwasser:
+   httimeprog 0 0 (Tag 0 = Montag)
+
+Zeiten Heizung
+  httimeprog 2 0 (Tag 0 = Montag)

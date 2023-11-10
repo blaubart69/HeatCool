@@ -1,0 +1,3 @@
+pi@zero:~/HeatCool $ lsusb
+Bus 001 Device 002: ID 067b:23a3 Prolific Technology, Inc. USB-Serial Controller 
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
