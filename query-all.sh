@@ -1,5 +1,5 @@
 #!/bin/bash
-/home/pi/.local/bin/htquery   \
+htquery                       \
   "Betriebsart"               \
   "Temp. Aussen"              \
   "Temp. Brauchwasser"        \
