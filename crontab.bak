@@ -20,10 +20,10 @@
 # 
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
-# m h  dom mon dow   command
-0  9 * * * /usr/local/bin/htset   "WW Normaltemp." 50
-0 19 * * * /usr/local/bin/htset   "WW Normaltemp." 45
-* * * * *  /home/bee/dev/HeatCool/writeAllToInflux.sh 
+#  m  h dom mon dow   command
+   0  9   *   *   *   /usr/local/bin/htset "WW Hysterese Normaltemp."  5
+   0 19   *   *   *   /usr/local/bin/htset "WW Hysterese Normaltemp." 10
+   *  *   *   *   *   /home/bee/dev/HeatCool/writeAllToInflux.sh 
 #>/dev/null 2>&1
 #* * * * *  /home/bee/dev/HeatCool/sendTempWWtoInflux.sh >/dev/null 2>&1
 #*  * * * * /usr/local/bin/htquery "WW Normaltemp." 1>/home/bee/logs/htqueryNormalTemp.log 2>/home/bee/logs/htqueryNormalTemp.err.log
