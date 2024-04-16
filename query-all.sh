@@ -1,6 +1,7 @@
 #!/bin/bash
 htquery                       \
   "Betriebsart"               \
+  "Verdichteranforderung"     \
   "Temp. Aussen"              \
   "Temp. Brauchwasser"        \
   "WW Normaltemp."            \
