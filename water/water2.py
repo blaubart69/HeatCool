@@ -51,8 +51,8 @@ def onSignal(null):
         liter_perhour = int ( ns_per_hour_times_two_signals / one_rotation_ns )
 
         print(f'{liter_perhour:>8} l/h '
-              f'\t{(locale.format_string("%.2f", ns_to_s(one_rotation_ns), True)):>8} s/{liter_per_two_signals}l:' 
-              f'\t{(locale.format_string("%.2f", ns_to_s(ctx.timespan[ctx.write_idx]))):>8} s last signal '
+              f'\t{(locale.format_string("%.2f", ns_to_s(one_rotation_ns), True)):>8} s/{liter_per_two_signals}l' 
+              #f'\t{(locale.format_string("%.2f", ns_to_s(ctx.timespan[ctx.write_idx]))):>8} s last signal '
               f'\t{datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")}')
 
         p = influxdb_client.Point("water").field("literperhour", liter_perhour)
