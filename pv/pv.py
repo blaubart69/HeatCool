@@ -1,4 +1,5 @@
 import time
+import datetime
 import sys
 
 from pyModbusTCP.client import ModbusClient
@@ -27,11 +28,11 @@ def print_reg(value, unit, gain, desc):
     gained_value = value / gain
     print(f'{gained_value:>10} {unit}\t{desc}')
 
-def create_influx_key_val(value : int, field : str):
+def create_influx_key_val(value : int, field : str, scale : int=1):
     if value is None:
         return []
     else:
-        return [f'{field}={value}']
+        return [f'{field}={value / scale}']
     
 
 # TCP auto connect on modbus request, close after it
@@ -40,22 +41,25 @@ c.open()
 time.sleep(1.0)
 
 try:
+    i=0
     while True:
-        
-        # > 0: feeding power to the power grid
-        # < 0: obtaining power from the power grid
+        # meter_active_power:
+        #   > 0: feeding power to the power grid
+        #   < 0: obtaining power from the power grid
         meter_active_power = read_reg(c, 37113, 2, signed=True, bits=32)
+        meter_grid_freq    = read_reg(c, 37118, 1, signed=True, bits=16)
+        inv_active_power   = read_reg(c, 32080, 2, signed=True, bits=32)
 
-        meter_grid_freq    = read_reg(c, 37118, 1, signed=True, bits=16) / 100
-        inv_active_power   = read_reg(c, 32080, 2, signed=True,  bits=32)
-
-        consumption        = inv_active_power - meter_active_power
+        if inv_active_power == None or meter_active_power == None:
+            consumption = None
+        else:
+            consumption = inv_active_power - meter_active_power
 
         fields = []
         fields += create_influx_key_val(meter_active_power, 'meter_power')
         fields += create_influx_key_val(inv_active_power,   'inv_power')
         fields += create_influx_key_val(consumption,        'consumption')
-        fields += create_influx_key_val(meter_grid_freq,    'grid_freq')
+        fields += create_influx_key_val(meter_grid_freq,    'grid_freq', scale=100)
 
         if len(fields) == 0:
             print('W: no datapoints')
@@ -63,6 +67,10 @@ try:
             str_fields = ','.join(fields)
             sys.stdout.write(f'pv {str_fields}\n')
             sys.stdout.flush()
+            i += 1
+            sys.stderr.write(f'{datetime.datetime.now().strftime("%Y.%m.%d %H:%M:%S")}'
+                             f'\t{i}\t{str_fields}\n')
+            sys.stderr.flush()
 
         time.sleep(5)
 
