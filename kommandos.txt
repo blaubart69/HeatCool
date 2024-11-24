@@ -28,3 +28,7 @@ Zeiten Warmwasser:
 
 Zeiten Heizung
   httimeprog 2 0 (Tag 0 = Montag)
+
+crontab:
+	backup:		crontab >crontab.bak
+	restore:	crontab  crontab.bak

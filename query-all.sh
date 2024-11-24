@@ -10,5 +10,4 @@ htquery                       \
   "WW Hysterese Minimaltemp." \
   "HKR_Sollwert"              \
   "HKR Soll_Raum"             \
-  "HKR Aufheiztemp. (K)"      \
-  "HKR Absenktemp. (K)"
+  "Temp. Ruecklauf"	      

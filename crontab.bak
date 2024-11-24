@@ -20,13 +20,26 @@
 # 
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
-#  m  h dom mon dow   command
-   0  8   *   *   *   /usr/local/bin/htset "WW Normaltemp."           50
-   1  8   *   *   *   /usr/local/bin/htset "HKR Soll_Raum"	      23.0	
-   0  9   *   *   *   /usr/local/bin/htset "WW Hysterese Normaltemp."  5
-   0 18   *   *   *   /usr/local/bin/htset "WW Normaltemp."           45
-   0 19   *   *   *   /usr/local/bin/htset "WW Hysterese Normaltemp." 10
-   1 19   *   *   *   /usr/local/bin/htset "HKR Soll_Raum"	      15.5	
+#  m   h dom mon dow   command
+#
+# Warmwasser
+#
+   0   8   *   *   *   /usr/local/bin/htset "WW Normaltemp."           50
+   1   8   *   *   *   /usr/local/bin/htset "WW Hysterese Normaltemp."  5
+   0  17   *   *   *   /usr/local/bin/htset "WW Normaltemp."           45
+   1  17   *   *   *   /usr/local/bin/htset "WW Hysterese Normaltemp." 10
+#
+# Heizung
+#
+  30   9   *   *   *   /usr/local/bin/htset "HKR Soll_Raum"	      23.5
+   1  19   *   *   *   /usr/local/bin/htset "HKR Soll_Raum"	      22.5
+#
+# Sommer, kühlen
+#
+#   1  9   *   *   *   /usr/local/bin/htset "Betriebsart"              "2"
+#  30 19   *   *   *   /usr/local/bin/htset "Betriebsart"              "3"
+
+	
 #   *  *   *   *   *   /home/bee/dev/HeatCool/writeAllToInflux.sh 
 #>/dev/null 2>&1
 #* * * * *  /home/bee/dev/HeatCool/sendTempWWtoInflux.sh >/dev/null 2>&1
